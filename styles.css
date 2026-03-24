@@ -731,6 +731,69 @@ body.lightbox-open {
 	.footer-peek {
 		width: min(240px, 60vw);
 	}
+
+	.page-panel,
+	.page-content {
+		min-width: 0;
+	}
+
+	.page-panel {
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.page-content {
+		overflow-x: auto;
+	}
+
+	.price-table {
+		table-layout: fixed;
+		min-width: 0;
+		inline-size: 100%;
+		width: 100%;
+		max-width: 100%;
+		font-size: 0.86rem;
+	}
+
+	.price-table th,
+	.price-table td {
+		min-width: 0;
+		padding: 6px;
+		white-space: normal;
+		overflow-wrap: anywhere;
+		word-break: break-word;
+		hyphens: auto;
+	}
+
+	.price-table .commstatus {
+		white-space: normal;
+		overflow-wrap: anywhere;
+	}
+
+	.price-table th:nth-child(1),
+	.price-table td:nth-child(1) {
+		width: 29%;
+	}
+
+	.price-table th:nth-child(2),
+	.price-table td:nth-child(2) {
+		width: 84px;
+	}
+
+	.price-table th:nth-child(3),
+	.price-table td:nth-child(3) {
+		width: 50%;
+	}
+
+	.price-table .center-flex {
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.price-table .gallery-cell.small,
+	.price-table .gallery-cell.tall {
+		width: min(44%, 110px);
+	}
 }
 
 .btn {
@@ -892,11 +955,18 @@ ink-footer {
 /* .active, .collapsible:hover {} */
 
 .collapsible-content {
-  padding: 0 18px;
-  display: none;
-  overflow: hidden;
-  margin-bottom: 20px;
-  transition: all 0.2s ease;
+	padding: 0 18px;
+	overflow: hidden;
+	margin-bottom: 20px;
+	height: 0;
+	opacity: 0;
+	transform: translateY(-8px);
+	transition: height 0.32s ease, opacity 0.22s ease, transform 0.32s ease;
+}
+
+.collapsible-content.is-open {
+	opacity: 1;
+	transform: translateY(0);
 }
 .collapsible-content div {
 	margin-top: 16px;
@@ -923,4 +993,11 @@ ink-footer {
 	display: inline-block;
 	margin-right: 12px;
 	background-color: var(--box-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.collapsible-content {
+		transition: none;
+		transform: none;
+	}
 }

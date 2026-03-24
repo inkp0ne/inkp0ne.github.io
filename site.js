@@ -402,6 +402,23 @@
 	document.addEventListener("DOMContentLoaded", function () {
 		var lightbox = setupLightbox();
 		var zoomables = document.querySelectorAll(".gallery-cell, .zoomable-image");
+		var lastLightboxOpenAt = 0;
+
+		function openZoomableElement(element) {
+			if (!element) {
+				return;
+			}
+			var source = getImageUrlFromElement(element);
+			if (!source) {
+				return;
+			}
+			var now = Date.now();
+			if (now - lastLightboxOpenAt < 220) {
+				return;
+			}
+			lastLightboxOpenAt = now;
+			lightbox.open(source);
+		}
 
 		zoomables.forEach(function (element) {
 			var source = getImageUrlFromElement(element);
@@ -417,7 +434,7 @@
 			}
 
 			function openFromElement() {
-				lightbox.open(source);
+				openZoomableElement(element);
 			}
 
 			element.addEventListener("click", openFromElement);
@@ -429,15 +446,87 @@
 			});
 		});
 		document.querySelectorAll(".js-flickity").forEach(function (flkEl) {
+			var tapPointerId = null;
+			var tapStartX = 0;
+			var tapStartY = 0;
+			var tapStartAt = 0;
+			var tapMoved = false;
+			var suppressClickUntil = 0;
+
+			flkEl.addEventListener("pointerdown", function (event) {
+				if (!event.isPrimary) {
+					return;
+				}
+				tapPointerId = event.pointerId;
+				tapStartX = event.clientX;
+				tapStartY = event.clientY;
+				tapStartAt = Date.now();
+				tapMoved = false;
+			});
+
+			flkEl.addEventListener("pointermove", function (event) {
+				if (event.pointerId !== tapPointerId) {
+					return;
+				}
+				if (Math.abs(event.clientX - tapStartX) > 10 || Math.abs(event.clientY - tapStartY) > 10) {
+					tapMoved = true;
+				}
+			});
+
+			flkEl.addEventListener("pointerup", function (event) {
+				if (event.pointerId !== tapPointerId) {
+					return;
+				}
+				var elapsed = Date.now() - tapStartAt;
+				var movedX = Math.abs(event.clientX - tapStartX);
+				var movedY = Math.abs(event.clientY - tapStartY);
+				tapPointerId = null;
+
+				if (tapMoved || elapsed > 420 || movedX > 10 || movedY > 10) {
+					suppressClickUntil = Date.now() + 260;
+					return;
+				}
+
+				if (event.pointerType !== "touch") {
+					return;
+				}
+
+				var tappedCell = event.target.closest(".gallery-cell");
+				if (tappedCell && flkEl.contains(tappedCell)) {
+					openZoomableElement(tappedCell);
+				}
+			});
+
+			flkEl.addEventListener("pointercancel", function () {
+				tapPointerId = null;
+				tapMoved = false;
+			});
+
+			flkEl.addEventListener("click", function (event) {
+				if (Date.now() < suppressClickUntil) {
+					return;
+				}
+				var clickedCell = event.target.closest(".gallery-cell");
+				if (clickedCell && flkEl.contains(clickedCell)) {
+					openZoomableElement(clickedCell);
+				}
+			});
+
 			flkEl.addEventListener("staticClick", function (event) {
-				var cellElement = event.detail && event.detail[1];
+				var detail = event.detail;
+				var cellElement = null;
+				if (Array.isArray(detail)) {
+					cellElement = detail[1] || detail[0] || null;
+				} else if (detail && detail.cellElement) {
+					cellElement = detail.cellElement;
+				}
+				if (!cellElement && event.target) {
+					cellElement = event.target.closest(".gallery-cell");
+				}
 				if (!cellElement) {
 					return;
 				}
-				var source = getImageUrlFromElement(cellElement);
-				if (source) {
-					lightbox.open(source);
-				}
+				openZoomableElement(cellElement);
 			});
 		});
 	});
@@ -473,16 +562,79 @@ customElements.define('color-box', ColorBox);
 var coll = document.getElementsByClassName("collapsible");
 var i;
 
+function toggleCollapsibleSection(trigger, content) {
+	var prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	var isExpanded = trigger.classList.contains("active");
+
+	if (prefersReducedMotion) {
+		if (isExpanded) {
+			trigger.classList.remove("active");
+			trigger.setAttribute("aria-expanded", "false");
+			content.classList.remove("is-open");
+			content.hidden = true;
+			content.style.height = "0px";
+		} else {
+			trigger.classList.add("active");
+			trigger.setAttribute("aria-expanded", "true");
+			content.hidden = false;
+			content.classList.add("is-open");
+			content.style.height = "auto";
+		}
+		return;
+	}
+
+	if (isExpanded) {
+		trigger.classList.remove("active");
+		trigger.setAttribute("aria-expanded", "false");
+		content.style.height = content.scrollHeight + "px";
+		content.classList.remove("is-open");
+		void content.offsetHeight;
+		content.style.height = "0px";
+
+		function onCollapseEnd(event) {
+			if (event.propertyName !== "height") {
+				return;
+			}
+			content.hidden = true;
+			content.removeEventListener("transitionend", onCollapseEnd);
+		}
+
+		content.addEventListener("transitionend", onCollapseEnd);
+		return;
+	}
+
+	trigger.classList.add("active");
+	trigger.setAttribute("aria-expanded", "true");
+	content.hidden = false;
+	content.style.height = "0px";
+	void content.offsetHeight;
+	content.classList.add("is-open");
+	content.style.height = content.scrollHeight + "px";
+
+	function onExpandEnd(event) {
+		if (event.propertyName !== "height") {
+			return;
+		}
+		content.style.height = "auto";
+		content.removeEventListener("transitionend", onExpandEnd);
+	}
+
+	content.addEventListener("transitionend", onExpandEnd);
+}
+
 for (i = 0; i < coll.length; i++) {
-  coll[i].addEventListener("click", function() {
-    this.classList.toggle("active");
-    var content = this.nextElementSibling;
-    if (content.style.display === "block") {
-      content.style.display = "none";
-    } else {
-      content.style.display = "block";
-    }
-  });
+	var trigger = coll[i];
+	var content = trigger.nextElementSibling;
+	if (!content) {
+		continue;
+	}
+	trigger.setAttribute("aria-expanded", "false");
+	content.hidden = true;
+	content.style.height = "0px";
+
+	trigger.addEventListener("click", function () {
+		toggleCollapsibleSection(this, this.nextElementSibling);
+	});
 }
 function copyText(text) {
 	navigator.clipboard.writeText(text).then(() => {
