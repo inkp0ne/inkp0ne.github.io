@@ -538,7 +538,7 @@ class SiteFooter extends HTMLElement {
 			'<div class="footer-content">' +
 			'<p class="footer-note">&copy; 2026 Inkp0ne\'s Attic</p>' +
 			'<ul class="credit-list">' +
-			'<li><a href="https://github.com/SagiriHimoto" target="_blank" rel="noopener noreferrer">SagiriHimoto</a></li>' +
+			'<li><a href="https://github.com/SagiriMax" target="_blank" rel="noopener noreferrer">SagiriHimoto</a></li>' +
 			// '<li><a href="https://panzi.github.io/Browser-Ponies/" target="_blank" rel="noopener noreferrer">Browser Ponies</a></li>' +
 			'<li><a href="https://flickity.metafizzy.co/" target="_blank" rel="noopener noreferrer">Flickity</a></li>' +
 			'<li><a href="https://simpleicons.org/" target="_blank" rel="noopener noreferrer">Simple Icons</a></li>' +
