@@ -555,12 +555,12 @@ class CommStatus extends HTMLElement {
 	}
 }
 customElements.define('comm-status', CommStatus);
-const commDescriptionP = document.querySelector("body > main > section.hero-panel > div.intro-row > div.intro-copy > div > div:nth-child(2) > p")
-if (commStatus === "open") {
+const commDescriptionP = document.querySelector("body > main > section.hero-panel > div.intro-row > div.intro-copy > div > div:nth-child(2) > p");
+if (window.location.pathname.includes("index.html")) {if (commStatus === "open") {
 	commDescriptionP.textContent = "Commissions are currently open. Contact me for more information.";
 } else {
 	commDescriptionP.textContent = "Commissions are currently closed. Please check back later for availability.";
-}
+}}
 customElements.define('ink-footer', SiteFooter);
 class ColorBox extends HTMLElement {
 	connectedCallback() {
