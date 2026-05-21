@@ -863,12 +863,12 @@ border-color: var(--ink-accent-2);
 	display: inline-block;
 }
 
-.credit-list a {
+a {
 	color: var(--ink-accent-2);
 	text-decoration: none;
 }
 
-.credit-list a:hover {
+a:hover {
 	text-decoration: underline;
 }
 

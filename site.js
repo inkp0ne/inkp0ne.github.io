@@ -538,7 +538,7 @@ class SiteFooter extends HTMLElement {
 			'<div class="footer-content">' +
 			'<p class="footer-note">&copy; 2026 Inkp0ne\'s Attic</p>' +
 			'<ul class="credit-list">' +
-			'<li><a href="https://github.com/SagiriMax" target="_blank" rel="noopener noreferrer">SagiriHimoto</a></li>' +
+			'<li><a href="https://github.com/SagiriHimoto" target="_blank" rel="noopener noreferrer">SagiriHimoto</a></li>' +
 			// '<li><a href="https://panzi.github.io/Browser-Ponies/" target="_blank" rel="noopener noreferrer">Browser Ponies</a></li>' +
 			'<li><a href="https://flickity.metafizzy.co/" target="_blank" rel="noopener noreferrer">Flickity</a></li>' +
 			'<li><a href="https://simpleicons.org/" target="_blank" rel="noopener noreferrer">Simple Icons</a></li>' +
@@ -546,6 +546,20 @@ class SiteFooter extends HTMLElement {
 			'</div>' +
 			'</footer>';
 	}
+}
+const commStatus = "open";
+class CommStatus extends HTMLElement {
+	connectedCallback() {
+		this.innerHTML =
+			`<span class="commstatus comm${commStatus}">[${commStatus.toUpperCase()}]</span>`;
+	}
+}
+customElements.define('comm-status', CommStatus);
+const commDescriptionP = document.querySelector("body > main > section.hero-panel > div.intro-row > div.intro-copy > div > div:nth-child(2) > p")
+if (commStatus === "open") {
+	commDescriptionP.textContent = "Commissions are currently open. Contact me for more information.";
+} else {
+	commDescriptionP.textContent = "Commissions are currently closed. Please check back later for availability.";
 }
 customElements.define('ink-footer', SiteFooter);
 class ColorBox extends HTMLElement {
